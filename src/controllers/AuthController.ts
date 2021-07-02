@@ -9,35 +9,78 @@ import config from "../config/config";
 class AuthController {
   static login = async (req: Request, res: Response) => {
     //Check if username and password are set
-    let { username, password } = req.body;
-    if (!(username && password)) {
-      res.status(400).send();
+    let { email, password } = req.body;
+    if (!(email && password)) {
+      res.status(400).json({
+        message: 'Şifre veya Email yanlış',
+        status: false,
+        data: '',
+        errorCode: 400,
+      });
+      return;
     }
 
     //Get user from database
     const userRepository = getRepository(User);
     let user: User;
     try {
-      user = await userRepository.findOneOrFail({ where: { username } });
+      user = await userRepository.findOneOrFail({
+        where: {
+          Email: email
+        }
+      });
     } catch (error) {
-      res.status(401).send();
+      res.status(400).json({
+        message: 'Şifre veya Email yanlış',
+        status: false,
+        data: '',
+        errorCode: 400,
+      });
+      return;
     }
 
+    console.log(user);
+
+    // if (!user) {
+    //   res.status(401).send();
+    //   return;
+    // }
+    
+
     //Check if encrypted password match
-    if (!user.checkIfUnencryptedPasswordIsValid(password)) {
-      res.status(401).send();
+    if (!user || !user.checkIfUnencryptedPasswordIsValid(password)) {
+      res.status(401).json({
+        message: 'Email veya şifre yanlış',
+        status: false,
+        data: '',
+        errorCode: 400,
+      });
       return;
     }
 
     //Sing JWT, valid for 1 hour
-    const token = jwt.sign(
-      { userId: user.id, username: user.username },
+    const token = jwt.sign({
+        userId: user.Id,
+        username: user.Username
+      },
       config.jwtSecret,
-      { expiresIn: "1h" }
+      {
+        expiresIn: "1d"
+      }
     );
 
     //Send the jwt in the response
-    res.send(token);
+    res.json({
+      status: true,
+      message: '',
+      data: {
+        email: user.Email,
+        firstName: user.Username,
+        lastName: user.Username,
+        token: token,
+      }
+    });
+    
   };
 
   static changePassword = async (req: Request, res: Response) => {
@@ -66,7 +109,7 @@ class AuthController {
     }
 
     //Validate de model (password lenght)
-    user.password = newPassword;
+    user.Password = newPassword;
     const errors = await validate(user);
     if (errors.length > 0) {
       res.status(400).send(errors);
@@ -79,4 +122,5 @@ class AuthController {
     res.status(204).send();
   };
 }
+
 export default AuthController;

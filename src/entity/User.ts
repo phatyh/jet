@@ -10,36 +10,40 @@ import { Length, IsNotEmpty } from "class-validator";
 import * as bcrypt from "bcryptjs";
 
 @Entity()
-@Unique(["username"])
+@Unique(["Username"])
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  Id: number;
 
   @Column()
   @Length(4, 20)
-  username: string;
+  Username: string;
+
+  @Column()
+  @Length(4, 20)
+  Email: string;
 
   @Column()
   @Length(4, 100)
-  password: string;
+  Password: string;
 
   @Column()
   @IsNotEmpty()
-  role: string;
+  Role: string;
 
   @Column()
   @CreateDateColumn()
-  createdAt: Date;
+  CreatedAt: Date;
 
   @Column()
   @UpdateDateColumn()
-  updatedAt: Date;
+  UpdatedAt: Date;
 
   hashPassword() {
-    this.password = bcrypt.hashSync(this.password, 8);
+    this.Password = bcrypt.hashSync(this.Password, 8);
   }
 
   checkIfUnencryptedPasswordIsValid(unencryptedPassword: string) {
-    return bcrypt.compareSync(unencryptedPassword, this.password);
+    return bcrypt.compareSync(unencryptedPassword, this.Password);
   }
 }
