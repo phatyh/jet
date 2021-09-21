@@ -5,7 +5,8 @@
    "logging": true,
    "debug": true,
    "entities": [
-      "src/entity/**/*.ts"
+      "src/entity/**/*.ts",
+      "'./build/entity/*.js"
    ],
    "migrations": [
       "src/migration/**/*.ts"

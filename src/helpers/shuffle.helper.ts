@@ -1,4 +1,4 @@
-export function shuffle(myArray) {
+export function shuffle(myArray: any) {
     var i = myArray.length;
     if (i == 0) return false;
     while (--i) {

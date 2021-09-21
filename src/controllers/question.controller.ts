@@ -2,11 +2,9 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import { validate } from "class-validator";
-import { nanoid } from 'nanoid'
-import { Questions } from "../entity/Questions";
-import { currentUserId } from "../helper/jwt";
-import { Choices } from "../entity/Choices";
-import { shuffle } from "../helper/shuffle";
+import { shuffle } from "../helpers";
+import { Choices, Questions } from "../entity";
+import { ChoiceController } from "./choice.controller";
 
 export class QuestionController {
 
@@ -24,23 +22,22 @@ export class QuestionController {
   static getOne = async (req: Request, res: Response) => {
     //Get the ID from the url
     const Id: string = req.params.id;
-  
 
     //Get the user from database
     const baseRepo = getRepository(Questions);
     const choiceRepo = getRepository(Choices);
     try {
       const data = await baseRepo.createQueryBuilder('q')
-        .where('q.hash = :hash', {hash: Id})
-        .andWhere('c.isCorrect = :isCorrect', {isCorrect: 1})
+        .where('q.hash = :hash', { hash: Id })
+        .andWhere('c.isCorrect = :isCorrect', { isCorrect: 1 })
         .select(['q.createdAt', 'q.createdUser', 'q.question', 'q.updatedAt', 'c.answer', 'c.hash'])
         .leftJoin('q.choices', 'c')
         .getOneOrFail();
 
       const getWrongs = await choiceRepo.createQueryBuilder('c')
         .select(['c.answer', 'c.hash'])
-        .where('c.questionHash = :questionHash', {questionHash: Id})
-        .andWhere('c.isCorrect = :isCorrect', {isCorrect: 0})
+        .where('c.questionHash = :questionHash', { questionHash: Id })
+        .andWhere('c.isCorrect = :isCorrect', { isCorrect: 0 })
         .orderBy('RANDOM()')
         .limit(3)
         .getMany();
@@ -66,8 +63,7 @@ export class QuestionController {
     let { question, correct, choices } = req.body;
     let data = new Questions();
     data.question = question;
-    data.hash = nanoid(11);
-    data.createdUser = currentUserId(req);
+    data.createdUser = res.locals.jwtPayload.userId;
 
     // Validade if the parameters are ok
     const errors = await validate(data);
@@ -78,29 +74,15 @@ export class QuestionController {
 
     // Try to save. If fails, the username is already in use
     const baseRepo = getRepository(Questions);
-    const choiceRepo = getRepository(Choices);
     try {
       await baseRepo.save(data).then(question => {
-        const getWrong: Choices[] = choices.map(choice => {
-          choice.hash = nanoid(16);
-          choice.questionHash = question.hash;
-          choice.isCorrect = false;
-
-          choiceRepo.save(choice);
+        choices.map((choice: Choices) => {
+          ChoiceController.saveWrong(question.hash, choice)
         });
-
-        
 
         return question;
       }).then(question => {
-        const getRight = new Choices();
-
-        getRight.hash = nanoid(16);
-        getRight.answer = correct;
-        getRight.questionHash = question.hash;
-        getRight.isCorrect = true;
-
-        choiceRepo.save(getRight);
+        ChoiceController.saveRight(question.hash, correct);
       });
     } catch (e) {
       res.status(409).json("username already in use");
@@ -108,9 +90,7 @@ export class QuestionController {
     }
 
     // If all ok, send 201 response
-    res.status(201).json(await baseRepo.findOneOrFail(data.hash, {
-      relations: ['']
-    }));
+    res.status(201).json(await baseRepo.findOneOrFail(data.hash));
   };
 
   static update = async (req: Request, res: Response) => {
@@ -170,7 +150,7 @@ export class QuestionController {
   };
 
   static check = async (req: Request, res: Response) => {
-    const {question, answer} = req.body;
+    const { question, answer } = req.body;
 
     const choiceRepo = getRepository(Choices);
 
@@ -199,7 +179,7 @@ export class QuestionController {
         errorCode: 200,
       });
     }
-    
+
 
   }
 };

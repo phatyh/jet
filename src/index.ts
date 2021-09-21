@@ -18,6 +18,7 @@ createConnection()
     app.use(bodyParser.json());
 
     //Set all routes from routes folder
+    // const routes = require("./routes/");
     app.use("/api", routes);
 
     app.listen(3000, () => {

@@ -2,11 +2,10 @@ import { Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 import { getRepository } from "typeorm";
 import { validate } from "class-validator";
-
-import { User } from "../entity/User";
 import config from "../config/config";
+import { User } from "../entity";
 
-class AuthController {
+export class AuthController {
   static login = async (req: Request, res: Response) => {
     //Check if username and password are set
     let { email, password } = req.body;
@@ -45,7 +44,7 @@ class AuthController {
     //   res.status(401).send();
     //   return;
     // }
-    
+
 
     //Check if encrypted password match
     if (!user || !user.checkIfUnencryptedPasswordIsValid(password)) {
@@ -60,9 +59,9 @@ class AuthController {
 
     //Sing JWT, valid for 1 hour
     const token = jwt.sign({
-        userId: user.Id,
-        username: user.Username
-      },
+      userId: user.Id,
+      username: user.Username
+    },
       config.jwtSecret,
       {
         expiresIn: "1d"
@@ -80,7 +79,7 @@ class AuthController {
         token: token,
       }
     });
-    
+
   };
 
   static changePassword = async (req: Request, res: Response) => {
@@ -121,6 +120,30 @@ class AuthController {
 
     res.status(204).send();
   };
+
+  static me = async (req: Request, res: Response) => {
+    //Get ID from JWT
+    const id = res.locals.jwtPayload.userId;
+
+    //Get user from the database
+    const userRepository = getRepository(User);
+    let user: User;
+    try {
+      user = await userRepository.findOneOrFail(id);
+    } catch (id) {
+      res.status(401).json();
+    }
+
+    res.status(200).json({
+      status: true,
+      message: '',
+      data: {
+        email: user.Email,
+        firstName: user.Username,
+        lastName: user.Username,
+      }
+    });
+  }
 }
 
 export default AuthController;

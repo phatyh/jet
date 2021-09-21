@@ -2,10 +2,9 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import { validate } from "class-validator";
+import { User } from "../entity";
 
-import { User } from "../entity/User";
-
-class UserController {
+export class UserController {
 
   static listAll = async (req: Request, res: Response) => {
     //Get users from database

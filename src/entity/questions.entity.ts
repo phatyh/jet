@@ -1,6 +1,7 @@
 import { Length } from "class-validator";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
-import { Choices } from "./Choices";
+import { nanoid } from "nanoid";
+import { BeforeInsert, Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Choices } from "./choices.entity";
 
 @Entity()
 export class Questions {
@@ -28,4 +29,9 @@ export class Questions {
 
     @OneToMany(() => Choices, choice => choice.question)
     choices: Choices[];
+
+    @BeforeInsert()
+    initSave() {
+        this.hash = nanoid(11);
+    }
 }
