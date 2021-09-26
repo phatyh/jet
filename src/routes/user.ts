@@ -7,20 +7,18 @@ const router = Router();
 
 //Get all users
 // router.get("/", [checkJwt, checkRole(["ADMIN"])], UserController.listAll);
-router.get("/", UserController.listAll);
+router.get("/", UserController.listAll)
 
 // Get one user
-router.get("/:id([0-9]+)", [checkJwt, checkRole(["ADMIN"])], UserController.getOneById);
+.get("/:id([0-9]+)", [checkJwt, checkRole(["ADMIN"])], UserController.getOneById)
 
 //Create a new user
-router.post("/", [checkJwt, checkRole(["ADMIN"])], UserController.newUser);
+.post("/", [checkJwt, checkRole(["ADMIN"])], UserController.newUser)
 
 //Edit one user
-router.patch( "/:id([0-9]+)", [checkJwt, checkRole(["ADMIN"])], UserController.editUser
-);
+.put( "/:id([0-9]+)", [checkJwt, checkRole(["ADMIN"])], UserController.editUser)
 
 //Delete one user
-router.delete( "/:id([0-9]+)", [checkJwt, checkRole(["ADMIN"])], UserController.deleteUser
-);
+.delete( "/:id([0-9]+)", [checkJwt, checkRole(["ADMIN"])], UserController.deleteUser);
 
-export default router;
+export default router;  

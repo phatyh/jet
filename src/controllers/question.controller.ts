@@ -30,9 +30,12 @@ export class QuestionController {
       const data = await baseRepo.createQueryBuilder('q')
         .where('q.hash = :hash', { hash: Id })
         .andWhere('c.isCorrect = :isCorrect', { isCorrect: 1 })
-        .select(['q.createdAt', 'q.createdUser', 'q.question', 'q.updatedAt', 'c.answer', 'c.hash'])
+        .select(['q.createdAt', 'q.createdUser', 'q.content', 'q.updatedAt', 'c.answer', 'c.hash'])
         .leftJoin('q.choices', 'c')
         .getOneOrFail();
+
+        console.log(data);
+        
 
       const getWrongs = await choiceRepo.createQueryBuilder('c')
         .select(['c.answer', 'c.hash'])
@@ -41,6 +44,8 @@ export class QuestionController {
         .orderBy('RANDOM()')
         .limit(3)
         .getMany();
+
+        console.log(getWrongs);
 
       data.choices.push(...getWrongs);
 
@@ -62,7 +67,7 @@ export class QuestionController {
     // Get parameters from the body
     let { question, correct, choices } = req.body;
     let data = new Questions();
-    data.question = question;
+    data.content = question;
     data.createdUser = res.locals.jwtPayload.userId;
 
     // Validade if the parameters are ok
@@ -112,7 +117,7 @@ export class QuestionController {
     }
 
     //Validate the new values on model
-    data.question = question;
+    data.content = question;
 
     const errors = await validate(data);
     if (errors.length > 0) {
@@ -181,5 +186,42 @@ export class QuestionController {
     }
 
 
+  }
+
+  static random = async (req: Request, res: Response) => {
+    //Get the user from database
+    const baseRepo = getRepository(Questions);
+    const choiceRepo = getRepository(Choices);
+    try {
+      const data = await baseRepo.createQueryBuilder('q')
+        // .where('q.hash = :hash', { hash: Id })
+        .andWhere('c.isCorrect = :isCorrect', { isCorrect: 1 })
+        .select(['q.createdAt', 'q.createdUser', 'q.content', 'q.updatedAt', 'c.answer', 'c.hash'])
+        .leftJoin('q.choices', 'c')
+        .orderBy('RANDOM()')
+        .getOneOrFail();
+
+      const getWrongs = await choiceRepo.createQueryBuilder('c')
+        .select(['c.answer', 'c.hash'])
+        .where('c.questionHash = :questionHash', { questionHash: data.hash })
+        .andWhere('c.isCorrect = :isCorrect', { isCorrect: 0 })
+        .orderBy('RANDOM()')
+        .limit(3)
+        .getMany();
+
+      data.choices.push(...getWrongs);
+
+      shuffle(data.choices);
+
+      // res.json(data);
+      res.status(200).json({
+        message: '',
+        status: true,
+        data: data,
+        errorCode: 200,
+      });
+    } catch (error) {
+      res.status(404).json(error);
+    }
   }
 };

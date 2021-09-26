@@ -10,7 +10,19 @@ export class Questions {
 
     @Column()
     @Length(4, 255)
-    question: string;
+    content: string;
+
+    @Column({ default: 0 })
+    point: number;
+
+    @Column()
+    status: number;
+
+    @Column({ default: 0 })
+    likes: number;
+
+    @Column({ default: 0 })
+    views: number;
 
     // @Column({ default: '' })
     // // @Length(11, 11)

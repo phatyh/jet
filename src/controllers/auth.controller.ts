@@ -59,8 +59,8 @@ export class AuthController {
 
     //Sing JWT, valid for 1 hour
     const token = jwt.sign({
-      userId: user.Id,
-      username: user.Username
+      userId: user.id,
+      username: user.username
     },
       config.jwtSecret,
       {
@@ -73,9 +73,9 @@ export class AuthController {
       status: true,
       message: '',
       data: {
-        email: user.Email,
-        firstName: user.Username,
-        lastName: user.Username,
+        email: user.email,
+        firstName: user.username,
+        lastName: user.username,
         token: token,
       }
     });
@@ -108,7 +108,7 @@ export class AuthController {
     }
 
     //Validate de model (password lenght)
-    user.Password = newPassword;
+    user.password = newPassword;
     const errors = await validate(user);
     if (errors.length > 0) {
       res.status(400).send(errors);
@@ -138,9 +138,9 @@ export class AuthController {
       status: true,
       message: '',
       data: {
-        email: user.Email,
-        firstName: user.Username,
-        lastName: user.Username,
+        email: user.email,
+        firstName: user.username,
+        lastName: user.username,
       }
     });
   }

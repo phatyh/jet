@@ -6,10 +6,12 @@ import { checkRole } from "../middlewares/checkRole";
 const router = Router();
 
 //Get all questions
-router.get("/", [checkJwt], QuestionController.getAll)
+router.get("/", QuestionController.getAll)
+
+.get('/random', QuestionController.random)
 
 // Get one question
-.get("/:id([0-9a-zA-Z]+)", [checkJwt, checkRole(["ADMIN"])], QuestionController.getOne)
+.get("/:id([0-9a-zA-Z_]+)", [checkJwt, checkRole(["ADMIN"])], QuestionController.getOne)
 
 //Create a new question
 .post("/", [checkJwt], QuestionController.create)
@@ -18,7 +20,7 @@ router.get("/", [checkJwt], QuestionController.getAll)
 .post('/check', [checkJwt], QuestionController.check)
 
 //Edit one question
-.patch( "/:id([0-9]+)", [checkJwt, checkRole(["ADMIN"])], QuestionController.update)
+.put( "/:id([0-9]+)", [checkJwt, checkRole(["ADMIN"])], QuestionController.update)
 
 //Delete one question
 .delete( "/:id([0-9]+)", [checkJwt, checkRole(["ADMIN"])], QuestionController.delete);

@@ -10,7 +10,7 @@ export class UserController {
     //Get users from database
     const userRepository = getRepository(User);
     const users = await userRepository.find({
-      select: ["Id", "Username", "Role"] //We dont want to send the passwords on response
+      select: ["id", "username", "role", 'firstname', 'lastname'] //We dont want to send the passwords on response
     });
 
     //Send the users object
@@ -25,7 +25,7 @@ export class UserController {
     const userRepository = getRepository(User);
     try {
       const user = await userRepository.findOneOrFail(Id, {
-        select: ["Id", "Username", "Role"] //We dont want to send the password on response
+        select: ["id", "username", "role", 'firstname', 'lastname'] //We dont want to send the password on response
       });
       res.send(user);
     } catch (error) {
@@ -37,9 +37,9 @@ export class UserController {
     //Get parameters from the body
     let { username, password, role } = req.body;
     let user = new User();
-    user.Username = username;
-    user.Password = password;
-    user.Role = role;
+    user.username = username;
+    user.password = password;
+    user.role = role;
 
     //Validade if the parameters are ok
     const errors = await validate(user);
@@ -83,8 +83,8 @@ export class UserController {
     }
 
     //Validate the new values on model
-    user.Username = username;
-    user.Role = role;
+    user.username = username;
+    user.role = role;
     const errors = await validate(user);
     if (errors.length > 0) {
       res.status(400).send(errors);
