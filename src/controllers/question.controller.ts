@@ -161,7 +161,7 @@ export class QuestionController {
     } else {
       res.status(200).json({
         message: 'Yanlış cevap',
-        status: false,
+        status: true,
         data: '',
         errorCode: 200,
       });
