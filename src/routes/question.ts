@@ -8,16 +8,16 @@ const router = Router();
 //Get all questions
 router.get("/", QuestionController.getAll)
 
-.get('/random', QuestionController.random)
-
 // Get one question
-.get("/:id([0-9a-zA-Z_]+)", [checkJwt, checkRole(["ADMIN"])], QuestionController.getOne)
+.get("/:id([0-9a-zA-Z_]+)", QuestionController.getOne)
 
-//Create a new question
-.post("/", [checkJwt], QuestionController.create)
+.get('/random', QuestionController.random)
 
 // check question answer
 .post('/check', [checkJwt], QuestionController.check)
+
+//Create a new question
+.post("/", [checkJwt], QuestionController.create)
 
 //Edit one question
 .put( "/:id([0-9]+)", [checkJwt, checkRole(["ADMIN"])], QuestionController.update)

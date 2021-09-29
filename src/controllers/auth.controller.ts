@@ -25,7 +25,7 @@ export class AuthController {
     try {
       user = await userRepository.findOneOrFail({
         where: {
-          Email: email
+          email: email
         }
       });
     } catch (error) {
